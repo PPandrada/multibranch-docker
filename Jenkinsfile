@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -7,25 +8,31 @@ pipeline {
                 sh 'docker build -t image1 .'
             }
         }
-        stage ("Tag") {
+
+        stage('Tag') {
             steps {
-                sh 'docker tag image1 shaikmustafa/paytm:bank'
+                sh 'docker tag image1 myrepo/paytm:bank'
             }
         }
+
         stage('Push') {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub') {
-                        sh 'docker push shaikmustafa/paytm:bank'
+                        sh 'docker push myrepo/paytm:bank'
                     }
                 }
             }
         }
-        
-        stage ("Deploy") {
+
+        stage('Deploy') {
             steps {
-                sh 'docker run -itd --name bank-app -p 1111:80 shaikmustafa/paytm:bank'
+                sh '''
+                    docker rm -f bank-app || true
+                    docker run -d --name bank-app -p 1111:80 myrepo/paytm:bank
+                '''
             }
         }
     }
 }
+
